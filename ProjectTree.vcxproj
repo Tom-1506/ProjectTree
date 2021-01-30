@@ -22,11 +22,13 @@
     <ClInclude Include="3dStruct\BoundingBox.h" />
     <ClInclude Include="3dStruct\threeDModel.h" />
     <ClInclude Include="Box\Box.h" />
+    <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Images\FreeImage.h" />
     <ClInclude Include="Images\ImageLoading.h" />
     <ClInclude Include="Obj\OBJLoader.h" />
     <ClInclude Include="Octree\Octree.h" />
     <ClInclude Include="shaders\Shader.h" />
+    <ClInclude Include="sphere\Sphere.h" />
     <ClInclude Include="Structures\Vector2d.h" />
     <ClInclude Include="Structures\Vector3d.h" />
     <ClInclude Include="TextureHandler\TextureHandler.h" />
@@ -36,11 +38,13 @@
     <ClCompile Include="3dStruct\BoundingBox.cpp" />
     <ClCompile Include="3dStruct\threeDModel.cpp" />
     <ClCompile Include="Box\Box.cpp" />
+    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Images\ImageLoading.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Obj\OBJLoader.cpp" />
     <ClCompile Include="Octree\Octree.cpp" />
     <ClCompile Include="shaders\Shader.cpp" />
+    <ClCompile Include="sphere\Sphere.cpp" />
     <ClCompile Include="Structures\Vector2d.cpp" />
     <ClCompile Include="Structures\Vector3d.cpp" />
     <ClCompile Include="TextureHandler\TextureHandler.cpp" />

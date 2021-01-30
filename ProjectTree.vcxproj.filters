@@ -37,6 +37,12 @@
     <ClCompile Include="shaders\Shader.cpp">
       <Filter>headers\shaders</Filter>
     </ClCompile>
+    <ClCompile Include="sphere\Sphere.cpp">
+      <Filter>headers\sphere</Filter>
+    </ClCompile>
+    <ClCompile Include="Cylinder.cpp">
+      <Filter>headers\cylinder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3dStruct\threeDModel.h">
@@ -75,6 +81,12 @@
     <ClInclude Include="shaders\Shader.h">
       <Filter>headers\shaders</Filter>
     </ClInclude>
+    <ClInclude Include="sphere\Sphere.h">
+      <Filter>headers\sphere</Filter>
+    </ClInclude>
+    <ClInclude Include="Cylinder.h">
+      <Filter>headers\cylinder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="headers">
@@ -112,6 +124,12 @@
     </Filter>
     <Filter Include="headers\shaders">
       <UniqueIdentifier>{c715a860-d723-4985-8289-8bd7cadcb8e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\sphere">
+      <UniqueIdentifier>{57b1a26a-b358-428f-86f0-c77fc4a9e625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\cylinder">
+      <UniqueIdentifier>{fed75860-4878-4fa0-a8cd-f865baef87b8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

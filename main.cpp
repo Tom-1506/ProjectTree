@@ -27,12 +27,17 @@ Shader* myBasicShader;
 //MODEL LOADING
 #include "3DStruct\threeDModel.h"
 #include "Obj\OBJLoader.h"
-
+#include "sphere/Sphere.h"
 
 
 float amount = 0;
 float temp = 0.002f;
 float moveSpeed = 0.05f;
+
+Sphere mySphere;
+glm::vec3 sphereCentre;
+
+GLUquadric* qobj;
 
 ThreeDModel models[3];
 ThreeDModel model; //A threeDModel object is needed for each model loaded
@@ -51,8 +56,8 @@ float Material_Specular[4] = {0.9f,0.9f,0.8f,1.0f};
 float Material_Shininess = 50;
 
 //Light Properties
-float Light_Ambient_And_Diffuse[4] = {0.8f, 0.8f, 0.6f, 1.0f};
-float Light_Specular[4] = {1.0f,1.0f,1.0f,1.0f};
+float Light_Ambient_And_Diffuse[4] = { 1.4f, 1.4f, 1.34f, 1.6f };
+float Light_Specular[4] = { 1.6f,1.6f,1.54f,1.6f };
 float LightPos[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 
 //
@@ -79,6 +84,10 @@ bool Zminus = false;
 float spin=180;
 float speed=0;
 
+float zoom = 0.0f;
+bool zoomIn = false;
+bool zoomOut = false;
+
 //OPENGL FUNCTION PROTOTYPES
 void display();				//called in winmain to draw everything to the screen
 void reshape(int width, int height);				//called when the window is resized
@@ -95,19 +104,13 @@ void display()
 	
 	glUseProgram(myShader->handle());  // use the shader
 
-	//amount += temp;
-	//if(amount > 1.0f || amount < -1.5f)
-	//	temp = -temp;
-	//amount = 0;
-	//glUniform1f(glGetUniformLocation(myShader->handle(), "displacement"), amount);
-
 	GLuint matLocation = glGetUniformLocation(myShader->handle(), "ProjectionMatrix");  
 	glUniformMatrix4fv(matLocation, 1, GL_FALSE, &ProjectionMatrix[0][0]);
 
 	glm::mat4 viewingMatrix = glm::mat4(1.0f);
 	
 	//translation and rotation for view
-	viewingMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -50));
+	viewingMatrix = glm::lookAt(glm::vec3(2 + zoom, 2 + zoom, 2 + zoom), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
 	/*static float angle = 0.0f;
 	angle += 0.0001;
 	viewingMatrix = glm::rotate(viewingMatrix, angle, glm::vec3(1.0f, 0.0f, 0.0));*/
@@ -127,19 +130,19 @@ void display()
 	glUniform4fv(glGetUniformLocation(myShader->handle(), "material_specular"), 1, Material_Specular);
 	glUniform1f(glGetUniformLocation(myShader->handle(), "material_shininess"), Material_Shininess);
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glm::mat4 modelmatrix = glm::translate(glm::mat4(1.0f), pos);
+
+	// TERRAIN
+	
+	glm::mat4 modelmatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	ModelViewMatrix = viewingMatrix * modelmatrix * objectTransformation;
 	//ModelViewMatrix = viewingMatrix * objectRotation;
 	
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
-
-	
+		
 	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
 	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 	
-	model.drawElementsUsingVBO(myShader);
-	
+	//model.drawElementsUsingVBO(myShader);	
 	
 	glUseProgram(myBasicShader->handle());  // use the shader
 	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
@@ -148,18 +151,29 @@ void display()
 	//model.drawBoundingBox(myBasicShader);
 	//model.drawOctreeLeaves(myBasicShader);
 	
-	glUseProgram(myShader->handle());  // use the shader
+	// END TERRAIN
 
-	ModelViewMatrix = glm::translate(viewingMatrix, glm::vec3(0, 0, 0));
+	//TEST SPHERE
 
-	normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
+	sphereCentre = glm::vec3(0.0f, 0.0f, 0.0f);
+	mySphere.setCentre(sphereCentre);
+
+	glUseProgram(myShader->handle());
+
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ViewMatrix"), 1, GL_FALSE, &viewingMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+
+	normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix)); // lighting normals for terrain
 	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 
-	//Pass the uniform for the modelview matrix - in this case just "r"
-	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
-	models[0].drawElementsUsingVBO(myShader);
-	models[1].drawElementsUsingVBO(myShader);
-	//boxFront.drawElementsUsingVBO(myShader);
+	//mySphere.render();	
+
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
+
+	//END TEST SPHERE
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	gluCylinder(qobj, 0.5, 0.5, 0.8, 20, 3);
 
 	glFlush();
 	glutSwapBuffers();
@@ -175,6 +189,7 @@ void reshape(int width, int height)		// Resize the OpenGL window
 	//Set the projection matrix
 	ProjectionMatrix = glm::perspective(glm::radians(60.0f), (GLfloat)screenWidth/(GLfloat)screenHeight, 1.0f, 200.0f);
 }
+
 void init()
 {
 	glClearColor(1.0,1.0,1.0,0.0);						//sets the clear colour to yellow
@@ -202,9 +217,9 @@ void init()
 	//lets initialise our object's rotation transformation 
 	//to the identity matrix
 	objectTransformation = glm::mat4(1.0f);
-
+	
 	cout << " loading model " << endl;
-	if(objLoader.loadModel("TestModels/conjoined.obj", model))//returns true if the model is loaded, puts the model in the model parameter
+	if(objLoader.loadModel("Models/flatGroundBox.obj", model))//returns true if the model is loaded, puts the model in the model parameter
 	{
 		cout << " model loaded " << endl;		
 
@@ -225,24 +240,17 @@ void init()
 	else
 	{
 		cout << " model failed to load " << endl;
-	}
-
-	models[0].fileName = "TestModels/boxLeft.obj";
-	models[1].fileName = "TestModels/boxRight.obj";
-	models[2].fileName = "TestModels/boxFront.obj";
-
-	for (ThreeDModel &box : models) {
-		if (objLoader.loadModel(const_cast<char*>(box.fileName.c_str()), box))//returns true if the model is loaded, puts the model in the model parameter
-		{
-			box.calcVertNormalsUsingOctree();  //the method will construct the octree if it hasn't already been created.
-			box.initDrawElements();
-			box.initVBO(myShader);
-		}
-		else
-		{
-			cout << " model failed to load " << endl;
-		}
 	}	
+
+	mySphere.setCentre(glm::vec3(0.0f, 0.0f, 0.0f));
+	mySphere.setRadius(0.5);
+	mySphere.constructGeometry(myShader, 10);
+
+	qobj = gluNewQuadric();
+	gluQuadricNormals(qobj, GLU_SMOOTH);
+	gluQuadricOrientation(qobj, GLU_OUTSIDE);
+
+	objectTransformation = glm::rotate(objectTransformation, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 }
 
 void special(int key, int x, int y)
@@ -260,13 +268,6 @@ void special(int key, int x, int y)
 		break;
 	case GLUT_KEY_DOWN:
 		Down = true;
-		break;
-	case GLUT_KEY_HOME:
-		moveSpeed += 0.03f;
-		break;
-	case GLUT_KEY_END:
-		moveSpeed -= 0.03f;
-		break;
 	}
 }
 
@@ -292,29 +293,14 @@ void specialUp(int key, int x, int y)
 void keyfunction(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 48:
-		Home = true;
+	case 43:
+		zoomIn = true;
 		break;
-	case 49:
-		End = true;
+	case 45:
+		zoomOut = true;
 		break;
-	case 111:
-		Yplus = true;
-		break;
-	case 112:
-		Yminus = true;
-		break;
-	case 97:
-		Xplus = true;
-		break;
-	case 100:
-		Xminus = true;
-		break;
-	case 119:
-		Zplus = true;
-		break;
-	case 115:
-		Zminus = true;
+	case 27:
+		exit(0);
 		break;
 	}
 }
@@ -322,29 +308,11 @@ void keyfunction(unsigned char key, int x, int y)
 void keyfunctionUp(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 48:
-		Home = false;
+	case 43:
+		zoomIn = false;
 		break;
-	case 49:
-		End = false;
-		break;
-	case 111:
-		Yplus = false;
-		break;
-	case 112:
-		Yminus = false;
-		break;
-	case 97:
-		Xplus = false;
-		break;
-	case 100:
-		Xminus = false;
-		break;
-	case 119:
-		Zplus = false;
-		break;
-	case 115:
-		Zminus = false;
+	case 45:
+		zoomOut = false;
 		break;
 	}
 }
@@ -354,57 +322,25 @@ void processKeys()
 	float spinXinc = 0.0f, spinYinc = 0.0f, spinZinc = 0.0f;
 	if (Left)
 	{
-		spinYinc = -0.05f;
+		spinZinc = -0.015f;
 	}
 	if (Right)
 	{
-		spinYinc = 0.05f;
+		spinZinc = 0.015f;
 	}
-	if (Up)
-	{
-		spinXinc = 0.05f;
+	if (Up) {
+
 	}
-	if (Down)
-	{
-		spinXinc = -0.05f;
+	if (Down) {
+
 	}
-	if (Home)
-	{
-		spinZinc = 0.05f;
+	if (zoomIn) {
+		if (zoom > 0.0f) {
+			zoom -= 0.01;
+		}
 	}
-	if (End)
-	{
-		spinZinc = -0.05f;
-	}
-	if (Xplus) {
-		pos.x += objectTransformation[0][0] * moveSpeed;
-		pos.y += objectTransformation[0][1] * moveSpeed;
-		pos.z += objectTransformation[0][2] * moveSpeed;
-	}
-	if (Xminus) {
-		pos.x -= objectTransformation[0][0] * moveSpeed;
-		pos.y -= objectTransformation[0][1] * moveSpeed;
-		pos.z -= objectTransformation[0][2] * moveSpeed;
-	}
-	if (Yplus) {
-		pos.x += objectTransformation[1][0] * moveSpeed;
-		pos.y += objectTransformation[1][1] * moveSpeed;
-		pos.z += objectTransformation[1][2] * moveSpeed;
-	}
-	if (Yminus) {
-		pos.x -= objectTransformation[1][0] * moveSpeed;
-		pos.y -= objectTransformation[1][1] * moveSpeed;
-		pos.z -= objectTransformation[1][2] * moveSpeed;
-	}
-	if (Zplus) {
-		pos.x += objectTransformation[2][0] * moveSpeed;
-		pos.y += objectTransformation[2][1] * moveSpeed;
-		pos.z += objectTransformation[2][2] * moveSpeed;
-	}
-	if (Zminus) {
-		pos.x -= objectTransformation[2][0] * moveSpeed;
-		pos.y -= objectTransformation[2][1] * moveSpeed;
-		pos.z -= objectTransformation[2][2] * moveSpeed;
+	if (zoomOut) {
+		zoom += 0.01;
 	}
 	updateRotate(spinXinc, spinYinc, spinZinc);
 }
@@ -468,6 +404,8 @@ int main(int argc, char **argv)
 
 	//starts the main loop. Program loops and calls callback functions as appropriate.
 	glutMainLoop();
+
+	gluDeleteQuadric(qobj);
 
 	return 0;
 }
