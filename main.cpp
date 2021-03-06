@@ -357,20 +357,20 @@ void processKeys()
 		spinYinc = 0.015f;
 	}
 	if (Up) {
-		cameraPan += 0.01;
+		cameraPan += 0.04;
 	}
 	if (Down) {
 		if (cameraPan > 0.0f) {
-			cameraPan -= 0.01f;
+			cameraPan -= 0.04f;
 		}
 	}
 	if (zoomIn) {
 		if (zoom > 0.0f) {
-			zoom -= 0.01;
+			zoom -= 0.04;
 		}
 	}
 	if (zoomOut) {
-		zoom += 0.01;
+		zoom += 0.04;
 	}
 	updateRotate(spinXinc, spinYinc, spinZinc);
 }
@@ -465,19 +465,25 @@ void genBinaryTree(BinaryTree bTree, string axiom, int recursions) {
 	
 	*/	
 
+	glm::vec3 top;
+	glm::vec3 rotatedTop;
+	Cylinder cylinder;
+	pair<double, double> newAngle;
+
 	for (char& c : bTreeString) {
-		glm::vec3 top = glm::vec3(0,0,0);
 		if (c == 'a') {
-			top = glm::vec3(currentPos.x, currentPos.y + length/2, currentPos.z);
-			Cylinder cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
+			top = glm::vec3(0.0f, length/2, 0.0f);
+
+			rotatedTop = rotatePoint(top, rotationX, rotationZ);
+			top = glm::vec3(rotatedTop.x + currentPos.x, rotatedTop.y + currentPos.y, rotatedTop.z + currentPos.z);
+			cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
 			cylinders.push_back(cylinder);
-			currentPos = top;
 		}
 		else if (c == 'b') {
 			top = glm::vec3(0.0f, length, 0.0f);
-			glm::vec3 rotatedTop = rotatePoint(top, rotationX, rotationZ);
+			rotatedTop = rotatePoint(top, rotationX, rotationZ);
 			top = glm::vec3(rotatedTop.x + currentPos.x, rotatedTop.y + currentPos.y, rotatedTop.z + currentPos.z);
-			Cylinder cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
+			cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
 			cylinders.push_back(cylinder);
 			currentPos = top;
 		}
@@ -485,17 +491,17 @@ void genBinaryTree(BinaryTree bTree, string axiom, int recursions) {
 			posList.push_back(currentPos);
 			angleList.push_back({ rotationX, rotationZ });
 			rotationX += 0.6f;
-			rotationZ += 0.0f;
+			rotationZ += 0.6f;
 		}
 		else if (c == ']') {
 			currentPos = posList.back();
 			posList.pop_back();
-			pair<double, double> newAngle = angleList.back();
+			newAngle = angleList.back();
 			angleList.pop_back();
 			rotationX = newAngle.first;
 			rotationZ = newAngle.second;
 			rotationX -= 0.6f;
-			rotationZ -= 0.0f;
+			rotationZ -= 0.6f;
 		}
 	}
 }
