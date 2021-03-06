@@ -43,6 +43,9 @@
     <ClCompile Include="Cylinder.cpp">
       <Filter>headers\cylinder</Filter>
     </ClCompile>
+    <ClCompile Include="L-systems.cpp">
+      <Filter>headers\L-systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3dStruct\threeDModel.h">
@@ -131,11 +134,11 @@
     <Filter Include="headers\cylinder">
       <UniqueIdentifier>{fed75860-4878-4fa0-a8cd-f865baef87b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers\L-systems">
+      <UniqueIdentifier>{43dba2b7-888b-44a1-99c2-8d4c5f8297bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="glslfiles\basicTransformationsWithDisplacement.vert">
-      <Filter>headers\glslfiles</Filter>
-    </None>
     <None Include="glslfiles\basic.frag">
       <Filter>headers\glslfiles</Filter>
     </None>
@@ -146,9 +149,6 @@
       <Filter>headers\glslfiles</Filter>
     </None>
     <None Include="glslfiles\basicTransformations.vert">
-      <Filter>headers\glslfiles</Filter>
-    </None>
-    <None Include="glslfiles\basicTransformationsWithDisplacement.frag">
       <Filter>headers\glslfiles</Filter>
     </None>
   </ItemGroup>

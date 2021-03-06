@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClCompile Include="3dStruct\BoundingBox.cpp" />
     <ClCompile Include="3dStruct\threeDModel.cpp" />
+    <ClCompile Include="L-systems.cpp" />
     <ClCompile Include="Box\Box.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Images\ImageLoading.cpp" />
@@ -55,8 +56,6 @@
     <None Include="glslfiles\basic.vert" />
     <None Include="glslfiles\basicTransformations.frag" />
     <None Include="glslfiles\basicTransformations.vert" />
-    <None Include="glslfiles\basicTransformationsWithDisplacement.frag" />
-    <None Include="glslfiles\basicTransformationsWithDisplacement.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{472FEE38-34C3-4DC2-8DFC-871F6F80345E}</ProjectGuid>

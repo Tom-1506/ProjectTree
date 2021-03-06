@@ -1,6 +1,7 @@
 
 #include "./GL/glew.h"
 #include "./glm\glm.hpp"
+#include <vector>
 
 class Shader;
 
@@ -18,15 +19,24 @@ private:
 	float* norms;
 	unsigned int* tInds;
 
+	std::vector<float> unitVertices;
+	std::vector<float> vertices;
+	std::vector<float> normals;
+	std::vector<float> texCoords;
+
 public:
-	float cx, cy, cz; //centre of base circle
-	float rb, rt; //radius of base and top circle
+	float cbx, cby, cbz; //centre of base circle
+	float ctx, cty, ctz; //centre of top circle
+	float r, rb, rt; //radius of base and top circle
 	float h; //height of cylinder
 
 	Cylinder();
+	void calcUnitCircleVertices(int level);
 	void constructGeometry(Shader* myShader, int level);
 	void render();
 	void setRadii(float radBase, float radTop);
-	void setBaseCentre(glm::vec3);
+	void setBaseCentre(glm::vec3 centre);
 	glm::vec3 getBaseCentre();
+	void setTopCentre(glm::vec3 centre);
+	glm::vec3 getTopCentre();
 };

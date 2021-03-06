@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-
+#include <math.h>
 
 //--- OpenGL ---
 #include "GL\glew.h"
@@ -19,7 +19,11 @@ using namespace std;
 
 #include "shaders\Shader.h"
 
+glm::mat4 worldTransformation;
 glm::mat4 objectTransformation;
+
+glm::mat4 treeTransformation;
+glm::mat4 treeTransforms[3];
 
 Shader* myShader;  ///shader object 
 Shader* myBasicShader;
@@ -28,14 +32,19 @@ Shader* myBasicShader;
 #include "3DStruct\threeDModel.h"
 #include "Obj\OBJLoader.h"
 #include "sphere/Sphere.h"
-
+#include "Cylinder.h"
+#include "L-systems.cpp"
 
 float amount = 0;
 float temp = 0.002f;
 float moveSpeed = 0.05f;
 
-Sphere mySphere;
-glm::vec3 sphereCentre;
+glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
+bool printString = true;
+BinaryTree bTree;
+BarnsleyFern bFern;
+
+std::vector<Cylinder> cylinders;
 
 GLUquadric* qobj;
 
@@ -58,7 +67,7 @@ float Material_Shininess = 50;
 //Light Properties
 float Light_Ambient_And_Diffuse[4] = { 1.4f, 1.4f, 1.34f, 1.6f };
 float Light_Specular[4] = { 1.6f,1.6f,1.54f,1.6f };
-float LightPos[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float LightPos[4] = {0.0f, 10.0f, 1.0f, 0.0f};
 
 //
 int	mouse_x=0, mouse_y=0;
@@ -70,23 +79,16 @@ bool Left = false;
 bool Right = false;
 bool Up = false;
 bool Down = false;
-bool Home = false;
-bool End = false;
-bool Go = false;
 
-bool Xplus = false;
-bool Xminus = false;
-bool Yplus = false;
-bool Yminus = false;
-bool Zplus = false;
-bool Zminus = false;
-
-float spin=180;
-float speed=0;
-
+float cameraPan = 0.0f;
+bool cameraPanUp = false;
+bool cameraPanDown = false;
 float zoom = 0.0f;
 bool zoomIn = false;
 bool zoomOut = false;
+
+//Tree vars
+float branchLength = 1;
 
 //OPENGL FUNCTION PROTOTYPES
 void display();				//called in winmain to draw everything to the screen
@@ -95,7 +97,10 @@ void init();				//called in winmain when the program starts.
 void processKeys();         //called in winmain to process keyboard input
 void idle();		//idle function
 void updateRotate(float xinc, float yinc, float zinc);
-void updateTranslate(float xinc, float yinc, float zinc);
+void genBinaryTree(BinaryTree bTree, string axiom, int recursions);
+void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions);
+Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius);
+glm::vec3 rotatePoint(glm::vec3 point, double rotationX, double rotationZ);
 
 /*************    START OF OPENGL FUNCTIONS   ****************/
 void display()									
@@ -110,13 +115,7 @@ void display()
 	glm::mat4 viewingMatrix = glm::mat4(1.0f);
 	
 	//translation and rotation for view
-	viewingMatrix = glm::lookAt(glm::vec3(2 + zoom, 2 + zoom, 2 + zoom), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
-	/*static float angle = 0.0f;
-	angle += 0.0001;
-	viewingMatrix = glm::rotate(viewingMatrix, angle, glm::vec3(1.0f, 0.0f, 0.0));*/
-
-	//use of glm::lookAt
-	//viewingMatrix = glm::lookAt(glm::vec3(-38, 19, 84), glm::vec3(0,0,0), glm::vec3(0.0f, 1.0f, 0.0));
+	viewingMatrix = glm::lookAt(glm::vec3(12 + zoom, 12 + zoom, 12 + zoom), glm::vec3(0.0f, 8.0f + cameraPan, 0.0f), glm::vec3(0, 1, 0));
 
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ViewMatrix"), 1, GL_FALSE, &viewingMatrix[0][0]);
 
@@ -130,50 +129,72 @@ void display()
 	glUniform4fv(glGetUniformLocation(myShader->handle(), "material_specular"), 1, Material_Specular);
 	glUniform1f(glGetUniformLocation(myShader->handle(), "material_shininess"), Material_Shininess);
 
+	//TEST CYLINDER
 
-	// TERRAIN
-	
 	glm::mat4 modelmatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	ModelViewMatrix = viewingMatrix * modelmatrix * objectTransformation;
-	//ModelViewMatrix = viewingMatrix * objectRotation;
-	
-	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
-		
-	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
-	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
-	
-	//model.drawElementsUsingVBO(myShader);	
-	
-	glUseProgram(myBasicShader->handle());  // use the shader
-	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
-	
-	//model.drawBoundingBox(myBasicShader);
-	//model.drawOctreeLeaves(myBasicShader);
-	
-	// END TERRAIN
-
-	//TEST SPHERE
-
-	sphereCentre = glm::vec3(0.0f, 0.0f, 0.0f);
-	mySphere.setCentre(sphereCentre);
+	ModelViewMatrix = viewingMatrix * modelmatrix * worldTransformation;
 
 	glUseProgram(myShader->handle());
 
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ViewMatrix"), 1, GL_FALSE, &viewingMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
 
-	normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix)); // lighting normals for terrain
+	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix)); // lighting normals
 	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 
-	//mySphere.render();	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	for (Cylinder c : cylinders) {
+		c.render();
+	}
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 
-	//END TEST SPHERE
+	//END TEST CYLINDER
+
+	//GLU CYLINDERS
+	modelmatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	ModelViewMatrix = viewingMatrix * modelmatrix * worldTransformation;
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	gluCylinder(qobj, 0.5, 0.5, 0.8, 20, 3);
+	
+	//Quadric cylinders 
+	/*
+	glm::mat4 modelViewTemp = ModelViewMatrix;
+	ModelViewMatrix = modelViewTemp * treeTransforms[0];
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+	gluCylinder(qobj, 0.5, 0.5, 2, 20, 4);
+
+	ModelViewMatrix = modelViewTemp * treeTransforms[1];
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+	gluCylinder(qobj, 0.5, 0.5, 1, 20, 3);
+
+	ModelViewMatrix = modelViewTemp * treeTransforms[2];
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+	gluCylinder(qobj, 0.5, 0.5, 1.3, 20, 3);
+	*/
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	//END GLU CYLINDERS
+
+	// TERRAIN
+
+	modelmatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	ModelViewMatrix = viewingMatrix * modelmatrix * worldTransformation;
+
+	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+
+	normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
+	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
+
+	model.drawElementsUsingVBO(myShader);
+
+	glUseProgram(myBasicShader->handle());  // use the shader
+	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ModelViewMatrix"), 1, GL_FALSE, &ModelViewMatrix[0][0]);
+
+	// END TERRAIN
 
 	glFlush();
 	glutSwapBuffers();
@@ -187,7 +208,7 @@ void reshape(int width, int height)		// Resize the OpenGL window
 	glViewport(0,0,width,height);						// Reset The Current Viewport
 
 	//Set the projection matrix
-	ProjectionMatrix = glm::perspective(glm::radians(60.0f), (GLfloat)screenWidth/(GLfloat)screenHeight, 1.0f, 200.0f);
+	ProjectionMatrix = glm::perspective(glm::radians(60.0f), (GLfloat)screenWidth/(GLfloat)screenHeight, 1.0f, 100.0f);
 }
 
 void init()
@@ -198,7 +219,6 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 
 	myShader = new Shader();
-	//if(!myShader->load("BasicView", "glslfiles/basicTransformationsWithDisplacement.vert", "glslfiles/basicTransformationsWithDisplacement.frag"))
     if(!myShader->load("BasicView", "glslfiles/basicTransformations.vert", "glslfiles/basicTransformations.frag"))
 	{
 		cout << "failed to load shader" << endl;
@@ -216,7 +236,8 @@ void init()
 
 	//lets initialise our object's rotation transformation 
 	//to the identity matrix
-	objectTransformation = glm::mat4(1.0f);
+	worldTransformation = glm::mat4(1.0f);
+	treeTransformation = glm::mat4(1.0f);
 	
 	cout << " loading model " << endl;
 	if(objLoader.loadModel("Models/flatGroundBox.obj", model))//returns true if the model is loaded, puts the model in the model parameter
@@ -228,7 +249,6 @@ void init()
 		//back so that the centre is on the origin.
 		//model.calcCentrePoint();
 		//model.centreOnZero();
-
 	
 		model.calcVertNormalsUsingOctree();  //the method will construct the octree if it hasn't already been created.
 				
@@ -242,15 +262,23 @@ void init()
 		cout << " model failed to load " << endl;
 	}	
 
-	mySphere.setCentre(glm::vec3(0.0f, 0.0f, 0.0f));
-	mySphere.setRadius(0.5);
-	mySphere.constructGeometry(myShader, 10);
+	genBinaryTree(bTree, "a", 6);
 
+	/*
 	qobj = gluNewQuadric();
 	gluQuadricNormals(qobj, GLU_SMOOTH);
 	gluQuadricOrientation(qobj, GLU_OUTSIDE);
 
-	objectTransformation = glm::rotate(objectTransformation, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	treeTransformation = glm::rotate(treeTransformation, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	treeTransforms[0] = treeTransformation;
+
+	treeTransformation = glm::translate(treeTransformation, glm::vec3(0, 0, 1.98));
+	treeTransformation = glm::rotate(treeTransformation, glm::radians(-45.0f), glm::vec3(1, 0, 0));
+	treeTransforms[1] = treeTransformation;
+
+	treeTransformation = glm::rotate(treeTransformation, glm::radians(90.0f), glm::vec3(1, 0, 0));
+	treeTransforms[2] = treeTransformation;
+	*/
 }
 
 void special(int key, int x, int y)
@@ -322,17 +350,19 @@ void processKeys()
 	float spinXinc = 0.0f, spinYinc = 0.0f, spinZinc = 0.0f;
 	if (Left)
 	{
-		spinZinc = -0.015f;
+		spinYinc = -0.015f;
 	}
 	if (Right)
 	{
-		spinZinc = 0.015f;
+		spinYinc = 0.015f;
 	}
 	if (Up) {
-
+		cameraPan += 0.01;
 	}
 	if (Down) {
-
+		if (cameraPan > 0.0f) {
+			cameraPan -= 0.01f;
+		}
 	}
 	if (zoomIn) {
 		if (zoom > 0.0f) {
@@ -347,17 +377,13 @@ void processKeys()
 
 void updateRotate(float xinc, float yinc, float zinc)
 {
-	objectTransformation = glm::rotate(objectTransformation, xinc, glm::vec3(1,0,0));
-	objectTransformation = glm::rotate(objectTransformation, yinc, glm::vec3(0,1,0));
-	objectTransformation = glm::rotate(objectTransformation, zinc, glm::vec3(0,0,1));
+	worldTransformation = glm::rotate(worldTransformation, xinc, glm::vec3(1,0,0));
+	worldTransformation = glm::rotate(worldTransformation, yinc, glm::vec3(0,1,0));
+	worldTransformation = glm::rotate(worldTransformation, zinc, glm::vec3(0,0,1));
 }
 
 void idle()
 {
-	spin += speed;
-	if(spin > 360)
-		spin = 0;
-
 	processKeys();
 
 	glutPostRedisplay();
@@ -371,7 +397,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(screenWidth, screenHeight);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("OpenGL FreeGLUT Example: Obj loading");
+	glutCreateWindow("Project Tree");
 
 	//This initialises glew - it must be called after the window is created.
 	GLenum err = glewInit();
@@ -408,4 +434,96 @@ int main(int argc, char **argv)
 	gluDeleteQuadric(qobj);
 
 	return 0;
+}
+
+void genBinaryTree(BinaryTree bTree, string axiom, int recursions) {
+	bTree.setAxiom(axiom);
+	string bTreeString = bTree.getSystemString(recursions);
+	if (printString) {
+		std::cout << bTreeString << std::endl;
+		printString = false;
+	}
+	
+	glm::vec3 currentPos = rootPos;
+	std::vector<glm::vec3> posList;
+	std::vector<pair<double, double>> angleList;
+
+	double rotationX = 0.0f;
+	double rotationZ = 0.0f;
+	double length = 0.25f;
+
+	// get target rotated point (top of next cylinder) through rotation about origin after subtraction of current position
+	/*
+	 
+	currentNewPoint  //unrotated top of cylinder, so length in y is already given but just vertical no x or z
+
+	pointForRotation = currentNewPoint - currentPos //subtract currentPos to allow a rotation about the origin
+
+	//rotate the point about the origin
+
+	targetRotatedPoint = originRotatePoint + currentPos //apply the currentPos translation to get final position of rotated point
+	
+	*/	
+
+	for (char& c : bTreeString) {
+		glm::vec3 top = glm::vec3(0,0,0);
+		if (c == 'a') {
+			top = glm::vec3(currentPos.x, currentPos.y + length/2, currentPos.z);
+			Cylinder cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
+			cylinders.push_back(cylinder);
+			currentPos = top;
+		}
+		else if (c == 'b') {
+			top = glm::vec3(0.0f, length, 0.0f);
+			glm::vec3 rotatedTop = rotatePoint(top, rotationX, rotationZ);
+			top = glm::vec3(rotatedTop.x + currentPos.x, rotatedTop.y + currentPos.y, rotatedTop.z + currentPos.z);
+			Cylinder cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
+			cylinders.push_back(cylinder);
+			currentPos = top;
+		}
+		else if (c == '[') {
+			posList.push_back(currentPos);
+			angleList.push_back({ rotationX, rotationZ });
+			rotationX += 0.6f;
+			rotationZ += 0.0f;
+		}
+		else if (c == ']') {
+			currentPos = posList.back();
+			posList.pop_back();
+			pair<double, double> newAngle = angleList.back();
+			angleList.pop_back();
+			rotationX = newAngle.first;
+			rotationZ = newAngle.second;
+			rotationX -= 0.6f;
+			rotationZ -= 0.0f;
+		}
+	}
+}
+
+void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions) {
+	bFern.setAxiom(axiom);
+	string bFernString = bFern.getSystemString(recursions);
+
+	glBegin(GL_LINES);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(1.0f, 1.0f, 0.0f);
+	glEnd();
+}
+
+Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius) {
+	Cylinder c;
+	
+	c.setBaseCentre(baseCentre);
+	c.setTopCentre(topCentre);
+	c.setRadii(baseRadius, topRadius);
+	c.constructGeometry(myShader, 10);
+
+	return c;
+}
+
+glm::vec3 rotatePoint(glm::vec3 point, double rotationX, double rotationZ) {
+	glm::vec3 xRotatedPoint = glm::vec3(point.x, point.y * cos(rotationX) - point.z * sin(rotationX), point.y * sin(rotationX) + point.z * cos(rotationX));
+	return (glm::vec3(xRotatedPoint.x * cos(rotationZ) - xRotatedPoint.y * sin(rotationZ), xRotatedPoint.x * sin(rotationZ) + xRotatedPoint.y * cos(rotationZ), xRotatedPoint.z));
 }
