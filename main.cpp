@@ -262,7 +262,8 @@ void init()
 		cout << " model failed to load " << endl;
 	}	
 
-	genBinaryTree(bTree, "a", 6);
+	//genBinaryTree(bTree, "a", 6);
+	genBarnsleyFern(bFern, "a", 5);
 
 	/*
 	qobj = gluNewQuadric();
@@ -452,19 +453,6 @@ void genBinaryTree(BinaryTree bTree, string axiom, int recursions) {
 	double rotationZ = 0.0f;
 	double length = 0.25f;
 
-	// get target rotated point (top of next cylinder) through rotation about origin after subtraction of current position
-	/*
-	 
-	currentNewPoint  //unrotated top of cylinder, so length in y is already given but just vertical no x or z
-
-	pointForRotation = currentNewPoint - currentPos //subtract currentPos to allow a rotation about the origin
-
-	//rotate the point about the origin
-
-	targetRotatedPoint = originRotatePoint + currentPos //apply the currentPos translation to get final position of rotated point
-	
-	*/	
-
 	glm::vec3 top;
 	glm::vec3 rotatedTop;
 	Cylinder cylinder;
@@ -509,13 +497,67 @@ void genBinaryTree(BinaryTree bTree, string axiom, int recursions) {
 void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions) {
 	bFern.setAxiom(axiom);
 	string bFernString = bFern.getSystemString(recursions);
+	if (printString) {
+		std::cout << bFernString << std::endl;
+		printString = false;
+	}
 
-	glBegin(GL_LINES);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(1.0f, 1.0f, 0.0f);
-	glEnd();
+	glm::vec3 currentPos = rootPos;
+	std::vector<glm::vec3> posList;
+	std::vector<pair<double, double>> angleList;
+
+	double rotationX = 0.0f;
+	double rotationZ = 0.0f;
+	double length = 0.25f;
+
+	glm::vec3 top;
+	glm::vec3 rotatedTop;
+	Cylinder cylinder;
+	pair<double, double> newAngle;
+	bool choice;
+
+	for (char& c : bFernString) {
+		choice = true;
+		if ((rand() % 2) + 1 == 2) {
+			choice = false;
+		}
+
+		if (choice) {
+			rotationX += 0.1f;
+		}
+		else {
+			rotationX -= 0.1f;
+		}
+
+		if (c == 'b') {
+			top = glm::vec3(0.0f, length, 0.0f);
+			rotatedTop = rotatePoint(top, rotationX, rotationZ);
+			top = glm::vec3(rotatedTop.x + currentPos.x, rotatedTop.y + currentPos.y, rotatedTop.z + currentPos.z);
+			cylinder = generateCylinder(currentPos, top, 0.5f, 0.5f);
+			cylinders.push_back(cylinder);
+			currentPos = top;
+		}
+		else if (c == '+') {
+			rotationX += 0.2f;
+			//rotationZ += 0.2f;
+		}
+		else if (c == '-') {
+			rotationX += 0.2f;
+			//rotationZ += 0.2f;
+		}
+		else if (c == '[') {
+			posList.push_back(currentPos);
+			angleList.push_back({ rotationX, rotationZ });
+		}
+		else if (c == ']') {
+			currentPos = posList.back();
+			posList.pop_back();
+			newAngle = angleList.back();
+			angleList.pop_back();
+			rotationX = newAngle.first;
+			rotationZ = newAngle.second;
+		}
+	}
 }
 
 Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius) {
