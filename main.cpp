@@ -43,6 +43,7 @@ glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
 bool printString = true;
 BinaryTree bTree;
 BarnsleyFern bFern;
+BasicTree basicTree;
 
 std::vector<Cylinder> cylinders;
 
@@ -99,6 +100,10 @@ void idle();		//idle function
 void updateRotate(float xinc, float yinc, float zinc);
 void genBinaryTree(BinaryTree bTree, string axiom, int recursions);
 void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions);
+void genBasicTree(BasicTree basicTree, string axiom,
+	double startBranchLength, double minBranchLength, double startBranchWidth,
+	double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
+	double lengthDegrade1, double lengthDegrade2);
 Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius);
 glm::vec3 rotatePoint(glm::vec3 point, double rotationX, double rotationZ);
 
@@ -188,7 +193,7 @@ void display()
 	normalMatrix = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
 	glUniformMatrix3fv(glGetUniformLocation(myShader->handle(), "NormalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 
-	model.drawElementsUsingVBO(myShader);
+	//model.drawElementsUsingVBO(myShader);
 
 	glUseProgram(myBasicShader->handle());  // use the shader
 	glUniformMatrix4fv(glGetUniformLocation(myBasicShader->handle(), "ProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
@@ -263,7 +268,8 @@ void init()
 	}	
 
 	//genBinaryTree(bTree, "a", 6);
-	genBarnsleyFern(bFern, "a", 5);
+	//genBarnsleyFern(bFern, "a", 5);
+	genBasicTree(basicTree, "A(0.25,1)", 0.25f, 0.02, 1, 0.6, -0.6, 0, 0, 0.75, 0.77);
 
 	/*
 	qobj = gluNewQuadric();
@@ -556,6 +562,41 @@ void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions) {
 			angleList.pop_back();
 			rotationX = newAngle.first;
 			rotationZ = newAngle.second;
+		}
+	}
+}
+
+void genBasicTree(BasicTree basicTree, string axiom, 
+	double startBranchLength, double minBranchLength, double startBranchWidth,
+	double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
+	double lengthDegrade1, double lengthDegrade2) {
+	basicTree.setAxiom(axiom);
+	string basicTreeString = basicTree.getSystemString(startBranchLength, minBranchLength, startBranchWidth,
+													   angleAlpha1, angleAlpha2, anglePhi1, anglePhi2,
+													   lengthDegrade1, lengthDegrade2);
+	if (printString) {
+		std::cout << basicTreeString << std::endl;
+		printString = false;
+	}
+
+	glm::vec3 currentPos = rootPos;
+	std::vector<glm::vec3> posList;
+	std::vector<pair<double, double>> angleList;
+
+	double rotationX = 0.0f;
+	double rotationZ = 0.0f;
+	double length = 0.0f;
+
+	glm::vec3 top;
+	glm::vec3 rotatedTop;
+	Cylinder cylinder;
+	pair<double, double> newAngle;
+
+	int j = 0;
+	string lineString;
+	for (int i = 0; i < basicTreeString.length(); i++) {
+		if (basicTreeString[i] == 'A') {
+			
 		}
 	}
 }

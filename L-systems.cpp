@@ -1,11 +1,13 @@
 #include<iostream>
-
 using namespace std;
 
+#include <string>
+#include <vector>
+
+#include "Apex.cpp"
+
 class LSystem {
-	public:
-		virtual string getSystemString(int recursions) = 0;
-		
+	public:		
 		void setAxiom(string a) {
 			axiom = a;
 		}
@@ -90,6 +92,29 @@ public:
 			}
 			result = newString;
 		}
+		return result;
+	}
+};
+
+class BasicTree : public LSystem {
+	/*
+	Production Rules :
+
+	*/
+public:
+	string getSystemString(double startBranchLength, double minBranchLength, double startBranchWidth,
+		double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
+		double lengthDegrade1, double lengthDegrade2) //add width changers
+	{ 
+		string result = axiom;
+		std::vector<Apex> apices;
+		double currentLength = startBranchLength;
+
+		while (currentLength > minBranchLength) {
+			
+			
+		}
+
 		return result;
 	}
 };

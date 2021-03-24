@@ -46,6 +46,9 @@
     <ClCompile Include="L-systems.cpp">
       <Filter>headers\L-systems</Filter>
     </ClCompile>
+    <ClCompile Include="Apex.cpp">
+      <Filter>headers\L-systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3dStruct\threeDModel.h">

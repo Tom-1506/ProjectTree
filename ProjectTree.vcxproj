@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClCompile Include="3dStruct\BoundingBox.cpp" />
     <ClCompile Include="3dStruct\threeDModel.cpp" />
+    <ClCompile Include="Apex.cpp" />
     <ClCompile Include="L-systems.cpp" />
     <ClCompile Include="Box\Box.cpp" />
     <ClCompile Include="Cylinder.cpp" />
