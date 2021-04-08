@@ -1,20 +1,4 @@
-#include<iostream>
-using namespace std;
-
-#include <string>
-#include <vector>
-
-#include "Apex.cpp"
-
-class LSystem {
-	public:		
-		void setAxiom(string a) {
-			axiom = a;
-		}
-
-	protected:
-		string axiom;
-};
+#include "L-systems.h"
 
 class BinaryTree : public LSystem {
 	/*
@@ -108,13 +92,32 @@ public:
 	{ 
 		string result = axiom;
 		std::vector<Apex> apices;
-		double currentLength = startBranchLength;
 
-		while (currentLength > minBranchLength) {
-			
-			
-		}
+		double branchLength = startBranchLength;
+		double branchWidth = startBranchWidth;
+		double a1 = angleAlpha1;
+		double a2 = angleAlpha2;
+		double p1 = anglePhi1;
+		double p2 = anglePhi2;
+		double r1 = lengthDegrade1;
+		double r2 = lengthDegrade2;
+
+		Apex root(0.0f, 0.0f, branchLength, branchWidth);
+		Apex apex1(angleAlpha1, anglePhi1, branchLength, branchWidth);
+		Apex apex2(angleAlpha2, anglePhi2, branchLength, branchWidth);
+
+		apices.push_back(root);
+		apices.push_back(apex1);
+		apices.push_back(apex2);
+
+		std::cout << "HERE" << std::endl;
+
+		//separate recursive function to add apices
 
 		return result;
+	}
+
+	void addApex() {
+
 	}
 };

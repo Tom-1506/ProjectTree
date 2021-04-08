@@ -93,6 +93,12 @@
     <ClInclude Include="Cylinder.h">
       <Filter>headers\cylinder</Filter>
     </ClInclude>
+    <ClInclude Include="Apex.h">
+      <Filter>headers\L-systems</Filter>
+    </ClInclude>
+    <ClInclude Include="L-systems.h">
+      <Filter>headers\L-systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="headers">

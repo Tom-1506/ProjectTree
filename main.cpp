@@ -592,13 +592,7 @@ void genBasicTree(BasicTree basicTree, string axiom,
 	Cylinder cylinder;
 	pair<double, double> newAngle;
 
-	int j = 0;
-	string lineString;
-	for (int i = 0; i < basicTreeString.length(); i++) {
-		if (basicTreeString[i] == 'A') {
-			
-		}
-	}
+
 }
 
 Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius) {

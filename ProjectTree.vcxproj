@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClInclude Include="3dStruct\BoundingBox.h" />
     <ClInclude Include="3dStruct\threeDModel.h" />
+    <ClInclude Include="Apex.h" />
     <ClInclude Include="Box\Box.h" />
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Images\FreeImage.h" />
     <ClInclude Include="Images\ImageLoading.h" />
+    <ClInclude Include="L-systems.h" />
     <ClInclude Include="Obj\OBJLoader.h" />
     <ClInclude Include="Octree\Octree.h" />
     <ClInclude Include="shaders\Shader.h" />
@@ -143,6 +145,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
