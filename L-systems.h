@@ -4,7 +4,7 @@ using namespace std;
 #include <string>
 #include <vector>
 
-#include "Apex.cpp"
+#include "Apex.h"
 
 class LSystem {
 public:

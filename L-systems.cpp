@@ -86,38 +86,47 @@ class BasicTree : public LSystem {
 
 	*/
 public:
-	string getSystemString(double startBranchLength, double minBranchLength, double startBranchWidth,
-		double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
-		double lengthDegrade1, double lengthDegrade2) //add width changers
+	std::vector<Apex*> getApices(double startBranchLength, double min, double startBranchWidth,
+								double a1, double a2, double p1, double p2, double r1, double r2, int count) //add width changers
 	{ 
 		string result = axiom;
-		std::vector<Apex> apices;
+		std::vector<Apex*> apices;
 
-		double branchLength = startBranchLength;
-		double branchWidth = startBranchWidth;
-		double a1 = angleAlpha1;
-		double a2 = angleAlpha2;
-		double p1 = anglePhi1;
-		double p2 = anglePhi2;
-		double r1 = lengthDegrade1;
-		double r2 = lengthDegrade2;
+		double l1 = startBranchLength;
+		double l2 = startBranchLength;
+		double w1 = startBranchWidth;
+		double w2 = startBranchWidth;
 
-		Apex root(0.0f, 0.0f, branchLength, branchWidth);
-		Apex apex1(angleAlpha1, anglePhi1, branchLength, branchWidth);
-		Apex apex2(angleAlpha2, anglePhi2, branchLength, branchWidth);
+		Apex* root = new Apex(0.0f, 0.0f, startBranchLength, startBranchWidth);
 
-		apices.push_back(root);
-		apices.push_back(apex1);
-		apices.push_back(apex2);
+		apices = constructTree(root, apices, a1, a2, p1, p2, l1, l2, r1, r2, min, w1, w2, count);
 
-		std::cout << "HERE" << std::endl;
-
-		//separate recursive function to add apices
-
-		return result;
+		return apices;
 	}
 
-	void addApex() {
+	std::vector<Apex*> constructTree(Apex* root, std::vector<Apex*> apices, double a1, double a2, double p1, double p2,
+									 double l1, double l2, double r1, double r2, double min, double w1, double w2, int count) {
+		Apex* apex1 = new Apex(a1, p1, l1, w1);
+		apex1->setParent(root);
+		Apex* apex2 = new Apex(a2, p2, l2, w2);
+		apex2->setParent(root);
 
+		apices.push_back(root);
+
+		// update variables
+		l1 = l1 * r1;
+		l2 = l2 * r2;
+		count--;
+
+		if(count > 0){
+			if (l1 > min) {
+				apices = constructTree(apex2, apices, a1, a2, p1, p2, l1, l2, r1, r2, min, w1, w2, count);
+			}
+			if (l2 > min) {
+				apices = constructTree(apex1, apices, a1, a2, p1, p2, l1, l2, r1, r2, min, w1, w2, count);
+			}
+		}
+		
+		return apices;
 	}
 };
