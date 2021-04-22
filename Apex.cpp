@@ -9,8 +9,6 @@ Apex::Apex(double inRotateAlpha, double inRotatePhi, double inLength, double inW
 
 	isRoot = true;
 	level = 0;
-	left = 0;
-	right = 0;
 	localRoot = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
@@ -20,15 +18,6 @@ void Apex::setParent(Apex* inParent) {
 	isRoot = false;
 	
 	level = parent->level + 1;
-
-	if (rotateAlpha > 0) {
-		left = parent->left + 1;
-		right = parent->right;
-	}
-	else {
-		left = parent->left;
-		right = parent->right + 1;
-	}
 }
 
 void Apex::addChild(Apex* child) {

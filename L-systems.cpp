@@ -86,7 +86,7 @@ class BasicTree : public LSystem {
 
 	*/
 public:
-	std::vector<Apex*> getApices(double startBranchLength, double min, double startBranchWidth,
+	std::vector<Apex*> getApices(glm::vec3 rootPos, double startBranchLength, double min, double startBranchWidth,
 								double a1, double a2, double p1, double p2, double r1, double r2, int count) //add width changers
 	{ 
 		string result = axiom;
@@ -98,6 +98,7 @@ public:
 		double w2 = startBranchWidth;
 
 		Apex* root = new Apex(0.0f, 0.0f, startBranchLength, startBranchWidth);
+		root->setLocalRoot(rootPos);
 
 		apices = constructTree(root, apices, a1, a2, p1, p2, l1, l2, r1, r2, min, w1, w2, count);
 
