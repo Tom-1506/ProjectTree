@@ -82,6 +82,7 @@ bool Right = false;
 bool Up = false;
 bool Down = false;
 
+float cameraTilt = 0.0f;
 float cameraPan = 0.0f;
 bool cameraPanUp = false;
 bool cameraPanDown = false;
@@ -121,7 +122,7 @@ void display()
 	glm::mat4 viewingMatrix = glm::mat4(1.0f);
 	
 	//translation and rotation for view
-	viewingMatrix = glm::lookAt(glm::vec3(2 + zoom, 2 + zoom, 2 + zoom), glm::vec3(0.0f, 3.0f + cameraPan, 0.0f), glm::vec3(0, 1, 0));
+	viewingMatrix = glm::lookAt(glm::vec3(4 + zoom, 4 + zoom + cameraPan, 4 + zoom), glm::vec3(0.0f, 3.0f + cameraTilt + cameraPan, 0.0f), glm::vec3(0, 1, 0));
 
 	glUniformMatrix4fv(glGetUniformLocation(myShader->handle(), "ViewMatrix"), 1, GL_FALSE, &viewingMatrix[0][0]);
 
@@ -188,7 +189,7 @@ void reshape(int width, int height)		// Resize the OpenGL window
 	glViewport(0,0,width,height);						// Reset The Current Viewport
 
 	//Set the projection matrix
-	ProjectionMatrix = glm::perspective(glm::radians(60.0f), (GLfloat)screenWidth/(GLfloat)screenHeight, 1.0f, 100.0f);
+	ProjectionMatrix = glm::perspective(glm::radians(60.0f), (GLfloat)screenWidth/(GLfloat)screenHeight, 0.01f, 100.0f);
 }
 
 void init()
@@ -214,8 +215,7 @@ void init()
 
 	glEnable(GL_TEXTURE_2D);
 
-	//lets initialise our object's rotation transformation 
-	//to the identity matrix
+	// initialise objects rotation transformations to the identity matrix
 	worldTransformation = glm::mat4(1.0f);
 	treeTransformation = glm::mat4(1.0f);
 	
@@ -247,11 +247,11 @@ void init()
 
 	glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 0.6, -0.6, 0, 0, 0.75, 0.75, 10); //binary tree A
-	genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, 0.471239, -1.18682, 0, 0, 0.65, 0.71, 12); //fractal tree B
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 0.43, -0.26, M_PI, 0, 0.5, 0.85, 9); //fractal tree C
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 0.44, -0.26, M_PI, M_PI, 0.60, 0.85, 10); // tall tree D
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.05f, 1, 0, 1.0472, 2*M_PI, 0, 0.92, 0.37, 15); //fractal tree F
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, glm::radians(35.0f), glm::radians(-35.0f), 0, 0, 0.75, 0.75, 10); //binary tree A
+	genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, glm::radians(27.0f), glm::radians(-68.0f), 0, 0, 0.65, 0.71, 12); //fractal tree B
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, glm::radians(25.0f), glm::radians(-15.0f), M_PI, 0, 0.5, 0.85, 9); //fractal tree C
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, glm::radians(25.0f), glm::radians(-15.0f), M_PI, M_PI, 0.60, 0.85, 10); // tall tree D
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 0, glm::radians(60.0f), M_PI, 0, 0.92, 0.37, 15); //fractal tree F
 }
 
 void special(int key, int x, int y)
@@ -300,6 +300,12 @@ void keyfunction(unsigned char key, int x, int y)
 	case 45:
 		zoomOut = true;
 		break;
+	case 48:
+		cameraPanDown = true;
+		break;
+	case 49:
+		cameraPanUp = true;
+		break;
 	case 27:
 		exit(0);
 		break;
@@ -314,6 +320,12 @@ void keyfunctionUp(unsigned char key, int x, int y)
 		break;
 	case 45:
 		zoomOut = false;
+		break;
+	case 48:
+		cameraPanDown = false;
+		break;
+	case 49:
+		cameraPanUp = false;
 		break;
 	}
 }
@@ -330,15 +342,25 @@ void processKeys()
 		spinYinc = 0.015f;
 	}
 	if (Up) {
-		cameraPan += 0.04;
+		if (cameraTilt < 4.0f) {
+			cameraTilt += 0.04;
+		}
 	}
 	if (Down) {
-		if (cameraPan > 0.0f) {
+		if (cameraTilt > -4.0f) {
+			cameraTilt -= 0.04f;
+		}
+	}
+	if (cameraPanUp) {
+		cameraPan += 0.04;
+	}
+	if (cameraPanDown) {
+		if (cameraPan > -4.0f) {
 			cameraPan -= 0.04f;
 		}
 	}
 	if (zoomIn) {
-		if (zoom > 0.0f) {
+		if (zoom > -3.0f) {
 			zoom -= 0.04;
 		}
 	}
@@ -576,7 +598,7 @@ Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseR
 
 glm::vec3 rotatePoint(glm::vec3 point, double length, double rotationAlpha, double rotationPhi) {
 	point.x = length * (cos(rotationPhi)) * (sin(rotationAlpha));
-	point.y = length * (sin(rotationPhi)) * (sin(rotationAlpha));
-	point.z = length * (cos(rotationAlpha));
+	point.y = length * (cos(rotationAlpha));
+	point.z = length * (sin(rotationPhi)) * (sin(rotationAlpha));
 	return (point);
 }
