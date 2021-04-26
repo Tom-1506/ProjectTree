@@ -104,7 +104,7 @@ void genBinaryTree(BinaryTree bTree, string axiom, int recursions);
 void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions);
 void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 	double startBranchLength, double minBranchLength, double startBranchWidth,
-	double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
+	float angleAlpha1, float angleAlpha2, float anglePhi1, float anglePhi2,
 	double lengthDegrade1, double lengthDegrade2, int count);
 Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseRadius, float topRadius);
 glm::vec3 rotatePoint(glm::vec3 point, double length, double rotationAlpha, double rotationPhi);
@@ -245,12 +245,12 @@ void init()
 	//genBinaryTree(bTree, "a", 6);
 	//genBarnsleyFern(bFern, "a", 5);
 
-	glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	//glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, glm::radians(35.0f), glm::radians(-35.0f), 0, 0, 0.75, 0.75, 10); //binary tree A
-	genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, glm::radians(27.0f), glm::radians(-68.0f), 0, 0, 0.65, 0.71, 12); //fractal tree B
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, glm::radians(25.0f), glm::radians(-15.0f), M_PI, 0, 0.5, 0.85, 9); //fractal tree C
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, glm::radians(25.0f), glm::radians(-15.0f), M_PI, M_PI, 0.60, 0.85, 10); // tall tree D
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 35.0, -35.0, 0, 0, 0.75, 0.75, 10); //binary tree A
+	genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, 27.0f, -68.0f, 0, 0, 0.65, 0.71, 12); //fractal tree B
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 25.0f, -15.0f, 180.0f, 0.0f, 0.5, 0.85, 2); //fractal tree C
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 25.0f, -15.0f, 180.0f, 180.0f, 0.60, 0.85, 10); // tall tree D
 	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 0, glm::radians(60.0f), M_PI, 0, 0.92, 0.37, 15); //fractal tree F
 }
 
@@ -556,7 +556,7 @@ void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions) {
 
 void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 	double startBranchLength, double minBranchLength, double startBranchWidth,
-	double angleAlpha1, double angleAlpha2, double anglePhi1, double anglePhi2,
+	float angleAlpha1, float angleAlpha2, float anglePhi1, float anglePhi2,
 	double lengthDegrade1, double lengthDegrade2, int count) {
 
 	std::vector<Apex*> apices = basicTree.getApices(rootPos, startBranchLength, minBranchLength, startBranchWidth,
@@ -566,7 +566,7 @@ void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 	Cylinder cylinder;
 
 	for (Apex* a : apices) {
-		top = rotatePoint(glm::vec3(0.0f, 0.0f, 0.0f), a->length, a->rotateAlpha, a->rotatePhi);
+		top = glm::vec3(a->rotationMatrix * glm::vec4(0, a->length, 0, 1));
 
 		top = glm::vec3(top.x + a->localRoot.x, top.y + a->localRoot.y, top.z + a->localRoot.z);
 		cylinder = generateCylinder(a->localRoot, top, 0.5f, 0.5f);
@@ -574,13 +574,13 @@ void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 
 		if (a->children.first != NULL) {
 			a->children.first->setLocalRoot(top);
-			a->children.first->rotateAlpha = a->children.first->rotateAlpha + a->rotateAlpha;
-			a->children.first->rotatePhi = a->children.first->rotatePhi + a->rotatePhi;
+			/*a->children.first->rotateAlpha = a->children.first->rotateAlpha + a->rotateAlpha;
+			a->children.first->rotatePhi = a->children.first->rotatePhi + a->rotatePhi;*/
 		}
 		if (a->children.second != NULL) {
 			a->children.second->setLocalRoot(top);
-			a->children.second->rotateAlpha = a->children.second->rotateAlpha + a->rotateAlpha;
-			a->children.second->rotatePhi = a->children.second->rotatePhi + a->rotatePhi;
+			/*a->children.second->rotateAlpha = a->children.second->rotateAlpha + a->rotateAlpha;
+			a->children.second->rotatePhi = a->children.second->rotatePhi + a->rotatePhi;*/
 		}
 	}
 }
@@ -596,6 +596,7 @@ Cylinder generateCylinder(glm::vec3 baseCentre, glm::vec3 topCentre, float baseR
 	return c;
 }
 
+// TODO possibly remove since no longer used
 glm::vec3 rotatePoint(glm::vec3 point, double length, double rotationAlpha, double rotationPhi) {
 	point.x = length * (cos(rotationPhi)) * (sin(rotationAlpha));
 	point.y = length * (cos(rotationAlpha));

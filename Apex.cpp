@@ -1,11 +1,13 @@
 #include "Apex.h"
 
-Apex::Apex(double inRotateAlpha, double inRotatePhi, double inLength, double inWidth)
+Apex::Apex(float inRotateAlpha, float inRotatePhi, double inLength, double inWidth)
 {
 	rotateAlpha = inRotateAlpha;
 	rotatePhi = inRotatePhi;
 	length = inLength;
 	width = inWidth;
+
+	rotationMatrix = glm::mat4(1.0);
 
 	isRoot = true;
 	level = 0;
@@ -16,6 +18,9 @@ void Apex::setParent(Apex* inParent) {
 	parent = inParent;
 	parent->addChild(this);
 	isRoot = false;
+
+	rotationMatrix = glm::rotate(parent->rotationMatrix, glm::radians(rotateAlpha), glm::vec3(0.0f,0.0f,1.0f));
+	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotatePhi), glm::vec3(parent->rotationMatrix[1][0], parent->rotationMatrix[1][1], parent->rotationMatrix[1][2]));
 	
 	level = parent->level + 1;
 }

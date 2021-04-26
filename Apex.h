@@ -2,13 +2,16 @@
 using namespace std;
 
 #include "glm\glm.hpp"
+#include "glm\gtc\matrix_transform.hpp"
+#include "glm\gtc\type_ptr.hpp"
+#include "glm\gtc\matrix_inverse.hpp"
 
 #include<vector>
 
 class Apex {
 public:
-	double rotateAlpha;
-	double rotatePhi;
+	float rotateAlpha;
+	float rotatePhi;
 	double length;
 	double width;
 	Apex* parent;
@@ -19,7 +22,9 @@ public:
 	int right;
 	int left;
 
-	Apex(double rotateAlpha, double rotatePhi, double length, double width);
+	glm::mat4 rotationMatrix;
+
+	Apex(float rotateAlpha, float rotatePhi, double length, double width);
 
 	void setParent(Apex* inParent);
 	void addChild(Apex* child);
