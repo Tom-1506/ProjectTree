@@ -14,13 +14,14 @@ public:
 	float rotatePhi;
 	double length;
 	double width;
+
 	Apex* parent;
+	pair<Apex*, Apex*> children;
+
 	bool isRoot;
 	glm::vec3 localRoot;
-	pair<Apex*, Apex*> children;
+
 	int level;
-	int right;
-	int left;
 
 	glm::mat4 rotationMatrix;
 

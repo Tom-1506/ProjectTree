@@ -248,10 +248,13 @@ void init()
 	//glm::vec3 rootPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 35.0, -35.0, 0, 0, 0.75, 0.75, 10); //binary tree A
-	genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, 27.0f, -68.0f, 0, 0, 0.65, 0.71, 12); //fractal tree B
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 25.0f, -15.0f, 180.0f, 0.0f, 0.5, 0.85, 2); //fractal tree C
+    //genBasicTree(basicTree, rootPos, 1.0f, 0.017f, 1, 27.0f, -68.0f, 0, 0, 0.65, 0.71, 12); //fractal tree B
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 25.0f, -15.0f, 180.0f, 0.0f, 0.5, 0.85, 9); //fractal tree C
 	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 25.0f, -15.0f, 180.0f, 180.0f, 0.60, 0.85, 10); // tall tree D
-	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 0, glm::radians(60.0f), M_PI, 0, 0.92, 0.37, 15); //fractal tree F
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.005f, 1, 0, 60.0f, 180.0f, 0, 0.92, 0.37, 15); //fractal tree F
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.0f, 1, 30.0f, -30.0f, 137.0f, 137.0f, 0.8f, 0.8f, 10); // realistic tree G
+	genBasicTree(basicTree, rootPos, 1.0f, 0.25f, 1, 5.0f, -30.0f, -90.0f, 90.0f, 0.95f, 0.75f, 12); // realistic tree H
+	//genBasicTree(basicTree, rootPos, 1.0f, 0.05f, 1, -5.0f, 30.0f, 137.0f, 137.0f, 0.55f, 0.95f, 12); // realistic tree I
 }
 
 void special(int key, int x, int y)
@@ -567,20 +570,16 @@ void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 
 	for (Apex* a : apices) {
 		top = glm::vec3(a->rotationMatrix * glm::vec4(0, a->length, 0, 1));
-
 		top = glm::vec3(top.x + a->localRoot.x, top.y + a->localRoot.y, top.z + a->localRoot.z);
+
 		cylinder = generateCylinder(a->localRoot, top, 0.5f, 0.5f);
 		cylinders.push_back(cylinder);
 
 		if (a->children.first != NULL) {
 			a->children.first->setLocalRoot(top);
-			/*a->children.first->rotateAlpha = a->children.first->rotateAlpha + a->rotateAlpha;
-			a->children.first->rotatePhi = a->children.first->rotatePhi + a->rotatePhi;*/
 		}
 		if (a->children.second != NULL) {
 			a->children.second->setLocalRoot(top);
-			/*a->children.second->rotateAlpha = a->children.second->rotateAlpha + a->rotateAlpha;
-			a->children.second->rotatePhi = a->children.second->rotatePhi + a->rotatePhi;*/
 		}
 	}
 }

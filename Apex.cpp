@@ -19,8 +19,8 @@ void Apex::setParent(Apex* inParent) {
 	parent->addChild(this);
 	isRoot = false;
 
-	rotationMatrix = glm::rotate(parent->rotationMatrix, glm::radians(rotateAlpha), glm::vec3(0.0f,0.0f,1.0f));
-	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotatePhi), glm::vec3(parent->rotationMatrix[1][0], parent->rotationMatrix[1][1], parent->rotationMatrix[1][2]));
+	rotationMatrix = glm::rotate(parent->rotationMatrix, glm::radians(rotateAlpha), glm::vec3(1.0f,0.0f,0.0f));
+	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotatePhi), glm::vec3(0, 1, 0));
 	
 	level = parent->level + 1;
 }
