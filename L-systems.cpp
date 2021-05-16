@@ -105,10 +105,10 @@ public:
 
 	std::vector<Apex*> constructTree(Apex* root, std::vector<Apex*> apices, float a1, float a2, float p1, float p2,
 									 double l1, double l2, double r1, double r2, double min, double w1, double w2, int count) {
-		Apex* apex1 = new Apex(a1, p1, root->length*r1, w1);
+		Apex* apex1 = new Apex(a1, p1, l1*r1, w1);
 		apex1->setParent(root);
 
-		Apex* apex2 = new Apex(a2, p2, root->length * r2, w2);
+		Apex* apex2 = new Apex(a2, p2, l2*r2, w2);
 		apex2->setParent(root);
 
 		apices.push_back(root);
