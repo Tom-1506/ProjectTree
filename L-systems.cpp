@@ -86,6 +86,15 @@ class BasicTree : public LSystem {
 
 	*/
 public:
+	/**
+	 * Begin construction of apices vector
+	 *
+	 * Using the parameters this function creates the root Apex of
+	 * the tree and then makes the first call to constructTree() to 
+	 * begin the recursive construction process.
+	 *
+	 * @param relevant data for constructing apices vector
+	 */
 	std::vector<Apex*> getApices(glm::vec3 rootPos, double startBranchLength, double min, double startBranchWidth,
 								float a1, float a2, float p1, float p2, double r1, double r2, int count) // TODO add width changers
 	{ 
@@ -103,6 +112,22 @@ public:
 		return apices;
 	}
 
+	/**
+	 * Construct tree segments
+	 *
+	 * Using the tree parameters and a root Apex 
+	 * this function creates two child apices of the root Apex 
+	 * and then recursively calls constructTree() again on each 
+	 * child. Parameters are edited using the degrade variables
+	 * where necessary.
+	 * The root Apex is added to the apices vector which, once 
+	 * recursion reaches max depth, will contain all apices 
+	 * required to construct the tree.
+	 *
+	 * @param root Root Apex object for this recursion
+	 * @param apices Vector of apices
+	 * @param relevant data for constructing apices vector
+	 */
 	std::vector<Apex*> constructTree(Apex* root, std::vector<Apex*> apices, float a1, float a2, float p1, float p2,
 									 double l1, double l2, double r1, double r2, double min, double w1, double w2, int count) {
 		Apex* apex1 = new Apex(a1, p1, l1*r1, w1);

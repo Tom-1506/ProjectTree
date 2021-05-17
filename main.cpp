@@ -559,6 +559,26 @@ void genBarnsleyFern(BarnsleyFern bFern, string axiom, int recursions) {
 	}
 }
 
+/**
+ * Populate cylinder list
+ *
+ * Using the inputted parameters generate an apices vector
+ * and then iterate through the apices and create cylinder
+ * objects that can be rendered.
+ * 
+ * @param basicTree BasicTree object used to call getApices() function
+ * @param rootPos Position in world space to generate the root of the tree
+ * @param startBranchLength Starting branch length
+ * @param minBranchLength Minimum branch length
+ * @param startBranchWidth Starting branch width
+ * @param angleAlpha1 Rotation about x axis for first child
+ * @param angleAlpha2 Rotation about x axis for second child
+ * @param anglePhi1 Rotation about y axis for first child
+ * @param anglePhi2 Rotation about y axis for second child
+ * @param lengthDegrade1 Length degredation value of first child
+ * @param lengthDegrade2 Length degredation value of second child
+ * @param count number of recursions
+ */
 void genBasicTree(BasicTree basicTree, glm::vec3 rootPos,
 	double startBranchLength, double minBranchLength, double startBranchWidth,
 	float angleAlpha1, float angleAlpha2, float anglePhi1, float anglePhi2,
